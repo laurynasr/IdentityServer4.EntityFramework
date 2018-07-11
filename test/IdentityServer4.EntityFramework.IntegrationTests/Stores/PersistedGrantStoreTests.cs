@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.EntityFramework.Options;
@@ -41,14 +42,14 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
         }
 
         [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void StoreAsync_WhenPersistedGrantStored_ExpectSuccess(DbContextOptions<PersistedGrantDbContext> options)
+        public async Task StoreAsync_WhenPersistedGrantStored_ExpectSuccess(DbContextOptions<PersistedGrantDbContext> options)
         {
             var persistedGrant = CreateTestObject();
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
             {
                 var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create());
-                store.StoreAsync(persistedGrant).Wait();
+                await store.StoreAsync(persistedGrant);
             }
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
@@ -59,42 +60,42 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
         }
 
         [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void GetAsync_WithKeyAndPersistedGrantExists_ExpectPersistedGrantReturned(DbContextOptions<PersistedGrantDbContext> options)
+        public async Task GetAsync_WithKeyAndPersistedGrantExists_ExpectPersistedGrantReturned(DbContextOptions<PersistedGrantDbContext> options)
         {
             var persistedGrant = CreateTestObject();
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
             {
                 context.PersistedGrants.Add(persistedGrant.ToEntity());
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             PersistedGrant foundPersistedGrant;
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
             {
                 var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create());
-                foundPersistedGrant = store.GetAsync(persistedGrant.Key).Result;
+                foundPersistedGrant = await store.GetAsync(persistedGrant.Key);
             }
 
             Assert.NotNull(foundPersistedGrant);
         }
 
         [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void GetAsync_WithSubAndTypeAndPersistedGrantExists_ExpectPersistedGrantReturned(DbContextOptions<PersistedGrantDbContext> options)
+        public async Task GetAsync_WithSubAndTypeAndPersistedGrantExists_ExpectPersistedGrantReturned(DbContextOptions<PersistedGrantDbContext> options)
         {
             var persistedGrant = CreateTestObject();
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
             {
                 context.PersistedGrants.Add(persistedGrant.ToEntity());
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
-            IList<PersistedGrant> foundPersistedGrants;
+            IEnumerable<PersistedGrant> foundPersistedGrants;
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
             {
                 var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create());
-                foundPersistedGrants = store.GetAllAsync(persistedGrant.SubjectId).Result.ToList();
+                foundPersistedGrants = await store.GetAllAsync(persistedGrant.SubjectId);
             }
 
             Assert.NotNull(foundPersistedGrants);
@@ -102,20 +103,20 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
         }
 
         [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void RemoveAsync_WhenKeyOfExistingReceived_ExpectGrantDeleted(DbContextOptions<PersistedGrantDbContext> options)
+        public async Task RemoveAsync_WhenKeyOfExistingReceived_ExpectGrantDeleted(DbContextOptions<PersistedGrantDbContext> options)
         {
             var persistedGrant = CreateTestObject();
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
             {
                 context.PersistedGrants.Add(persistedGrant.ToEntity());
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
             
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
             {
                 var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create());
-                store.RemoveAsync(persistedGrant.Key).Wait();
+                await store.RemoveAsync(persistedGrant.Key);
             }
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
@@ -126,20 +127,20 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
         }
 
         [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void RemoveAsync_WhenSubIdAndClientIdOfExistingReceived_ExpectGrantDeleted(DbContextOptions<PersistedGrantDbContext> options)
+        public async Task RemoveAsync_WhenSubIdAndClientIdOfExistingReceived_ExpectGrantDeleted(DbContextOptions<PersistedGrantDbContext> options)
         {
             var persistedGrant = CreateTestObject();
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
             {
                 context.PersistedGrants.Add(persistedGrant.ToEntity());
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
             {
                 var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create());
-                store.RemoveAllAsync(persistedGrant.SubjectId, persistedGrant.ClientId).Wait();
+                await store.RemoveAllAsync(persistedGrant.SubjectId, persistedGrant.ClientId);
             }
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
@@ -150,20 +151,20 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
         }
 
         [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void RemoveAsync_WhenSubIdClientIdAndTypeOfExistingReceived_ExpectGrantDeleted(DbContextOptions<PersistedGrantDbContext> options)
+        public async Task RemoveAsync_WhenSubIdClientIdAndTypeOfExistingReceived_ExpectGrantDeleted(DbContextOptions<PersistedGrantDbContext> options)
         {
             var persistedGrant = CreateTestObject();
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
             {
                 context.PersistedGrants.Add(persistedGrant.ToEntity());
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
             {
                 var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create());
-                store.RemoveAllAsync(persistedGrant.SubjectId, persistedGrant.ClientId, persistedGrant.Type).Wait();
+                await store.RemoveAllAsync(persistedGrant.SubjectId, persistedGrant.ClientId, persistedGrant.Type);
             }
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
@@ -174,7 +175,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
         }
 
         [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void Store_should_create_new_record_if_key_does_not_exist(DbContextOptions<PersistedGrantDbContext> options)
+        public async Task Store_should_create_new_record_if_key_does_not_exist(DbContextOptions<PersistedGrantDbContext> options)
         {
             var persistedGrant = CreateTestObject();
 
@@ -187,7 +188,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
             {
                 var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create());
-                store.StoreAsync(persistedGrant).Wait();
+                await store.StoreAsync(persistedGrant);
             }
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
@@ -198,14 +199,14 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
         }
 
         [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void Store_should_update_record_if_key_already_exists(DbContextOptions<PersistedGrantDbContext> options)
+        public async Task Store_should_update_record_if_key_already_exists(DbContextOptions<PersistedGrantDbContext> options)
         {
             var persistedGrant = CreateTestObject();
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))
             {
                 context.PersistedGrants.Add(persistedGrant.ToEntity());
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             var newDate = persistedGrant.Expiration.Value.AddHours(1);
@@ -213,7 +214,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
             {
                 var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create());
                 persistedGrant.Expiration = newDate;
-                store.StoreAsync(persistedGrant).Wait();
+                await store.StoreAsync(persistedGrant);
             }
 
             using (var context = new PersistedGrantDbContext(options, StoreOptions))

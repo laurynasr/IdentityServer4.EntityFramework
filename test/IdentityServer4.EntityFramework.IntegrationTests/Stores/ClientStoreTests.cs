@@ -3,6 +3,7 @@
 
 
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
@@ -26,7 +27,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
         }
 
         [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void FindClientByIdAsync_WhenClientExists_ExpectClientRetured(DbContextOptions<ConfigurationDbContext> options)
+        public async Task FindClientByIdAsync_WhenClientExists_ExpectClientRetured(DbContextOptions<ConfigurationDbContext> options)
         {
             var testClient = new Client
             {
@@ -37,21 +38,21 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
             using (var context = new ConfigurationDbContext(options, StoreOptions))
             {
                 context.Clients.Add(testClient.ToEntity());
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             Client client;
             using (var context = new ConfigurationDbContext(options, StoreOptions))
             {
                 var store = new ClientStore(context, FakeLogger<ClientStore>.Create());
-                client = store.FindClientByIdAsync(testClient.ClientId).Result;
+                client = await store.FindClientByIdAsync(testClient.ClientId);
             }
 
             Assert.NotNull(client);
         }
 
         [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void FindClientByIdAsync_WhenClientExists_ExpectClientPropertiesRetured(DbContextOptions<ConfigurationDbContext> options)
+        public async Task FindClientByIdAsync_WhenClientExists_ExpectClientPropertiesRetured(DbContextOptions<ConfigurationDbContext> options)
         {
             var testClient = new Client
             {
@@ -67,14 +68,14 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
             using (var context = new ConfigurationDbContext(options, StoreOptions))
             {
                 context.Clients.Add(testClient.ToEntity());
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             Client client;
             using (var context = new ConfigurationDbContext(options, StoreOptions))
             {
                 var store = new ClientStore(context, FakeLogger<ClientStore>.Create());
-                client = store.FindClientByIdAsync(testClient.ClientId).Result;
+                client = await store.FindClientByIdAsync(testClient.ClientId);
             }
 
             client.Properties.Should().NotBeNull();

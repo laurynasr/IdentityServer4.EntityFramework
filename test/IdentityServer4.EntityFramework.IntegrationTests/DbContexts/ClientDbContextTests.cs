@@ -8,6 +8,7 @@ using System.Linq;
 using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Options;
 using Xunit;
+using System.Threading.Tasks;
 
 namespace IdentityServer4.EntityFramework.IntegrationTests.DbContexts
 {
@@ -23,7 +24,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.DbContexts
         }
 
         [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void CanAddAndDeleteClientScopes(DbContextOptions<ConfigurationDbContext> options)
+        public async Task CanAddAndDeleteClientScopes(DbContextOptions<ConfigurationDbContext> options)
         {
             using (var db = new ConfigurationDbContext(options, StoreOptions))
             {
@@ -33,7 +34,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.DbContexts
                     ClientName = "Test Client"
                 });
 
-                db.SaveChanges();
+                await db.SaveChangesAsync();
             }
 
             using (var db = new ConfigurationDbContext(options, StoreOptions))
@@ -46,7 +47,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.DbContexts
                     Scope = "test"
                 });
 
-                db.SaveChanges();
+                await db.SaveChangesAsync();
             }
 
             using (var db = new ConfigurationDbContext(options, StoreOptions))
@@ -56,7 +57,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.DbContexts
 
                 client.AllowedScopes.Remove(scope);
 
-                db.SaveChanges();
+                await db.SaveChangesAsync();
             }
 
             using (var db = new ConfigurationDbContext(options, StoreOptions))
@@ -68,7 +69,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.DbContexts
         }
 
         [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void CanAddAndDeleteClientRedirectUri(DbContextOptions<ConfigurationDbContext> options)
+        public async Task CanAddAndDeleteClientRedirectUri(DbContextOptions<ConfigurationDbContext> options)
         {
             using (var db = new ConfigurationDbContext(options, StoreOptions))
             {
@@ -78,7 +79,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.DbContexts
                     ClientName = "Test Client"
                 });
 
-                db.SaveChanges();
+                await db.SaveChangesAsync();
             }
 
             using (var db = new ConfigurationDbContext(options, StoreOptions))
@@ -90,7 +91,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.DbContexts
                     RedirectUri = "https://redirect-uri-1"
                 });
 
-                db.SaveChanges();
+                await db.SaveChangesAsync();
             }
 
             using (var db = new ConfigurationDbContext(options, StoreOptions))
@@ -100,7 +101,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.DbContexts
 
                 client.RedirectUris.Remove(redirectUri);
 
-                db.SaveChanges();
+                await db.SaveChangesAsync();
             }
 
             using (var db = new ConfigurationDbContext(options, StoreOptions))
